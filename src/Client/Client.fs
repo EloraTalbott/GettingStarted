@@ -152,43 +152,134 @@ open Fable.Core.JsInterop
 
 // game1 ()
 
-let game2 () =
-  let taunts = 
-    [
-      "Nice try"
-      "too slow"
-      "you'll never catch me"
-      "I'm too fast for you"
-      "Boo"
-      "yawn..."
-      "I could do this all day"
-      "tired yet?"
-      "ready to give up?"
-    ]
+// let ghostCatcher () =
+//   let taunts = 
+//     [
+//       "Nice try"
+//       "too slow"
+//       "you'll never catch me"
+//       "I'm too fast for you"
+//       "Boo"
+//       "yawn..."
+//       "I could do this all day"
+//       "tired yet?"
+//       "ready to give up?"
+//     ]
 
-  let mainBody = Browser.document.getElementById("body")
-  let header = Browser.document.createElement_h1()
-  header.innerText <- "Catch me if you can..."
-  mainBody.appendChild header |> ignore
-  let ghost = Browser.document.createElement_img()
-  ghost.style.position <- "absolute"
-  ghost.src <- "images/ghost.bmp"
-  let mutable caught = 0
-  let caughtMe _ = 
-    caught <- 1
-    ghost.style.display <- "none"
-    header.innerHTML <- "Ahh you caught me!!!"
+//   let mainBody = Browser.document.getElementById("body")
+//   let header = Browser.document.createElement_h1()
+//   header.innerText <- "Catch me if you can..."
+//   mainBody.appendChild header |> ignore
+//   let ghost = Browser.document.createElement_img()
+//   ghost.style.position <- "absolute"
+//   ghost.src <- "images/ghost.bmp"
+//   let mutable caught = 0
+//   let caughtMe _ = 
+//     caught <- 1
+//     ghost.style.display <- "none"
+//     header.innerHTML <- "Ahh you caught me!!!"
 
-  let runAway () = 
-    if caught = 0 then
-      let rnd = System.Random()
-      let n = rnd.Next(taunts.Length - 1)
-      header.innerText <- taunts.[n]
-      ghost.style.left <- sprintf "%ipx" (rnd.Next(650))
-      ghost.style.top <- sprintf "%ipx" (rnd.Next(400))
-  let runAwaySoon _ = Browser.window.setTimeout(runAway,200,[]) |> ignore 
-  ghost.onmouseenter <- runAwaySoon
-  ghost.onclick <- caughtMe
-  mainBody.appendChild ghost |> ignore
+//   let runAway () = 
+//     if caught = 0 then
+//       let rnd = System.Random()
+//       let n = rnd.Next(taunts.Length - 1)
+//       header.innerText <- taunts.[n]
+//       ghost.style.left <- sprintf "%ipx" (rnd.Next(650))
+//       ghost.style.top <- sprintf "%ipx" (rnd.Next(400))
+//   let runAwaySoon _ = Browser.window.setTimeout(runAway,200,[]) |> ignore 
+//   ghost.onmouseenter <- runAwaySoon
+//   ghost.onclick <- caughtMe
+//   mainBody.appendChild ghost |> ignore
   
-game2 ()
+// ghostCatcher ()
+
+let wormChase () =
+  let mutable score = 0
+  let mutable lives = 3
+  let mutable chickenX = 6
+  let mutable chickenY = 10
+  let mutable wormX = 8
+  let mutable wormY = 0
+  let mainBody = Browser.document.getElementById("body")
+  let chicken = Browser.document.createElement_img()
+  chicken.id <- "chicken"
+  chicken.style.position <- "absolute"
+  chicken.style.top <- "500px"
+  chicken.style.left <- "300px"
+  chicken.src <- "images/chicken.jpeg"
+  chicken.width <- 50.
+  let worm = Browser.document.createElement_img()
+  worm.id <- "worm"
+  worm.style.position <- "absolute"
+  worm.src <- "images/worm.png"
+  worm.width <- 30.
+  let scoreUi = Browser.document.createElement_p()
+  scoreUi.innerText <- "Score:0"
+  scoreUi.id <- "scoreTB"
+  let livesUi = Browser.document.createElement_p()
+  livesUi.id <- "livesTB"
+  livesUi.innerText <- sprintf "Lives:%i" lives
+  mainBody.appendChild worm |> ignore
+  mainBody.appendChild chicken |> ignore
+  mainBody.appendChild scoreUi |> ignore
+  mainBody.appendChild livesUi |> ignore
+
+  let setLeft (id, x) = Browser.document.getElementById(id).style.left <- x.ToString() + "px"
+  let setTop(id, y) = Browser.document.getElementById(id).style.top <- (sprintf "%ipx" y)
+
+  let handleKeys(e:Browser.KeyboardEvent) =
+    if (e.keyCode = 37.) then
+      chickenX <- chickenX - 1
+    if (e.keyCode = 39.) then
+      chickenX <- chickenX + 1
+
+    setLeft("chicken", chickenX * 50)
+    setTop("chicken", chickenY * 50)
+
+  Browser.document.onkeydown <- handleKeys;
+
+  let randomNumber(low, high) =
+    let rnd = System.Random()
+    rnd.Next(low,high)
+
+  let gameOver() =
+    Browser.window.alert("Game Over! You scored:" + (score.ToString()))
+    lives <- 3
+    Browser.document.getElementById("livesTB").innerText <- sprintf "Lives:%i" lives
+    score <- 0
+    Browser.document.getElementById("scoreTB").innerText <- sprintf "Score:%i" score
+    //location.reload();
+
+  let missedworm() =
+    wormY <- 0
+    wormX <- randomNumber(2, 16)
+    lives <- lives - 1
+    Browser.document.getElementById("livesTB").innerText <- sprintf "Lives:%i" lives
+    if (lives = 0) then
+      gameOver()
+    else
+      ()
+
+  let caughtworm() =
+    wormY <- 0
+    wormX <- randomNumber(2, 16)
+    score <- score + 1
+    Browser.document.getElementById("scoreTB").innerText <- sprintf "Score:%i" score
+
+  let moveworm() =
+    wormY <- wormY + 1;
+    setLeft("worm", wormX * 50)
+    setTop("worm", wormY * 50)
+    if (wormY > chickenY + 5) then
+      missedworm()
+    else
+      if (chickenX = wormX && chickenY = wormY) then
+        caughtworm()
+      else
+        ()
+  
+  let gameTimer = Browser.window.setInterval(moveworm, 200);
+
+  ()
+  
+wormChase ()
