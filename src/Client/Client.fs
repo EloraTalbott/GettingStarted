@@ -10,6 +10,7 @@ open Fable.PowerPack.Fetch
 open Shared
 
 open Fulma
+open Fable.Import
 
 
 // type Model = Counter option
@@ -74,15 +75,15 @@ open Fulma
 //         [ str txt ]
 
 // let multiply () = 
-// //   Fable.Import.Browser.window.alert "Hello"
+// //   Browser.window.alert "Hello"
 //   let rnd = System.Random()
 //   let a = rnd.Next(10) * 10
 //   let b = rnd.Next(10) * 10
-//   let answer = Fable.Import.Browser.window.prompt("What is " + a.ToString() + " x " + b.ToString() + "?")
+//   let answer = Browser.window.prompt("What is " + a.ToString() + " x " + b.ToString() + "?")
 //   if ((int)answer = a * b) then
-//     Fable.Import.Browser.window.alert("Correct!");
+//     Browser.window.alert("Correct!");
 //   else
-//     Fable.Import.Browser.window.alert("Try again silly! It is "+ (a * b).ToString() + "!");
+//     Browser.window.alert("Try again silly! It is "+ (a * b).ToString() + "!");
 
 
 // let view (model : Model) (dispatch : Msg -> unit) =
@@ -106,10 +107,8 @@ open Fulma
 // #endif
 // |> Program.run
 
-
 open Fable.Core
 open Fable.Core.JsInterop
-open Fable.Import
 
 // let init() =
 //     let canvas = Browser.document.getElementsByTagName_canvas().[0]
@@ -126,19 +125,70 @@ open Fable.Import
 // init()
 
 
-let changeColorFn () =
-  let colors = ["red"; "green"; "blue"; "yellow";"purple";"black";"orange";"pink";]
-  let changeColor () =
-    let rnd = System.Random()
-    let n = rnd.Next(colors.Length)
-    // let newButton = Fable.Import.Browser.document.createElement("button")
-    let mainDiv = Fable.Import.Browser.document.getElementById("elmish-app")
-    // mainDiv.appendChild newButton |> ignore
-    // newButton.innerText <- "foo"
-    // newButton.style.backgroundColor <- "red"
-    let mainBody = Fable.Import.Browser.document.getElementById("body")
-    mainBody.style.backgroundColor <- colors.[n]
-  let timer = Fable.Import.Browser.window.setInterval(changeColor, 500)
-  timer |> ignore
+// let changeColorFn () =
+//   let colors = ["red"; "green"; "blue"; "yellow";"purple";"black";"orange";"pink";"brown";]
+//   let changeColor () =
+//     let rnd = System.Random()
+//     let n = rnd.Next(colors.Length)
+//     // let newButton = Browser.document.createElement("button")
+//     // let mainDiv = Browser.document.getElementById("elmish-app")
+//     // mainDiv.appendChild newButton |> ignore
+//     // newButton.innerText <- "foo"
+//     // newButton.style.backgroundColor <- "red"
+//     let mainBody = Fable.Import.Browser.document.getElementById("body")
+//     mainBody.style.backgroundColor <- colors.[n]
+//   let timer = Fable.Import.Browser.window.setInterval(changeColor, 500)
+//   timer |> ignore
+// changeColorFn ()
 
-changeColorFn ()
+
+// let game1 () =
+//   let mainBody = Browser.document.getElementById("body")
+//   // let ghost = Browser.Image.Create()
+//   let ghost = Browser.document.createElement_img()
+//   ghost.src <- "images/ghost.bmp"
+//   ghost.onclick <- (fun _ -> ghost.style.display <- "none")
+//   mainBody.appendChild ghost |> ignore
+
+// game1 ()
+
+let game2 () =
+  let taunts = 
+    [
+      "Nice try"
+      "too slow"
+      "you'll never catch me"
+      "I'm too fast for you"
+      "Boo"
+      "yawn..."
+      "I could do this all day"
+      "tired yet?"
+      "ready to give up?"
+    ]
+
+  let mainBody = Browser.document.getElementById("body")
+  let header = Browser.document.createElement_h1()
+  header.innerText <- "Catch me if you can..."
+  mainBody.appendChild header |> ignore
+  let ghost = Browser.document.createElement_img()
+  ghost.style.position <- "absolute"
+  ghost.src <- "images/ghost.bmp"
+  let mutable caught = 0
+  let caughtMe _ = 
+    caught <- 1
+    ghost.style.display <- "none"
+    header.innerHTML <- "Ahh you caught me!!!"
+
+  let runAway () = 
+    if caught = 0 then
+      let rnd = System.Random()
+      let n = rnd.Next(taunts.Length - 1)
+      header.innerText <- taunts.[n]
+      ghost.style.left <- sprintf "%ipx" (rnd.Next(650))
+      ghost.style.top <- sprintf "%ipx" (rnd.Next(400))
+  let runAwaySoon _ = Browser.window.setTimeout(runAway,200,[]) |> ignore 
+  ghost.onmouseenter <- runAwaySoon
+  ghost.onclick <- caughtMe
+  mainBody.appendChild ghost |> ignore
+  
+game2 ()
