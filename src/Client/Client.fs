@@ -201,28 +201,38 @@ let wormChase () =
   let mutable wormX = 8
   let mutable wormY = 0
   let mainBody = Browser.document.getElementById("body")
+  let gameBackground = Browser.document.createElement_div()
+  gameBackground.style.background <- "linear-gradient(blue, green)"
+  gameBackground.style.height <- "600px"
+  let gameGround = Browser.document.createElement_div()
+  gameGround.style.background <- "linear-gradient(green, saddlebrown)"
+  gameGround.style.height <- "100px"
   let chicken = Browser.document.createElement_img()
   chicken.id <- "chicken"
   chicken.style.position <- "absolute"
   chicken.style.top <- "500px"
   chicken.style.left <- "300px"
-  chicken.src <- "images/chicken.jpeg"
+  chicken.src <- "images/chickenface.png"
   chicken.width <- 50.
   let worm = Browser.document.createElement_img()
   worm.id <- "worm"
   worm.style.position <- "absolute"
   worm.src <- "images/worm.png"
   worm.width <- 30.
-  let scoreUi = Browser.document.createElement_p()
+  let scoreUi = Browser.document.createElement_h1()
   scoreUi.innerText <- "Score:0"
   scoreUi.id <- "scoreTB"
-  let livesUi = Browser.document.createElement_p()
+  scoreUi.style.fontSize <- "20pt"
+  let livesUi = Browser.document.createElement_h1()
   livesUi.id <- "livesTB"
+  livesUi.style.fontSize <- "20pt"
   livesUi.innerText <- sprintf "Lives:%i" lives
+  mainBody.appendChild gameBackground |> ignore
   mainBody.appendChild worm |> ignore
   mainBody.appendChild chicken |> ignore
-  mainBody.appendChild scoreUi |> ignore
-  mainBody.appendChild livesUi |> ignore
+  gameBackground.appendChild scoreUi |> ignore
+  gameBackground.appendChild livesUi |> ignore
+  mainBody.appendChild gameGround |> ignore
 
   let setLeft (id, x) = Browser.document.getElementById(id).style.left <- x.ToString() + "px"
   let setTop(id, y) = Browser.document.getElementById(id).style.top <- (sprintf "%ipx" y)
@@ -270,7 +280,7 @@ let wormChase () =
     wormY <- wormY + 1;
     setLeft("worm", wormX * 50)
     setTop("worm", wormY * 50)
-    if (wormY > chickenY + 5) then
+    if (wormY > chickenY + 1) then
       missedworm()
     else
       if (chickenX = wormX && chickenY = wormY) then
