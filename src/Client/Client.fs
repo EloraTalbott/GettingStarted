@@ -195,7 +195,7 @@ open Fable.Core.JsInterop
 
 let wormChase () =
   let mutable score = 0
-  let mutable lives = 3
+  let mutable lives = 5
   let mutable chickenX = 6
   let mutable chickenY = 10
   let mutable wormX = 8
@@ -254,7 +254,7 @@ let wormChase () =
 
   let gameOver() =
     Browser.window.alert("Game Over! You scored:" + (score.ToString()))
-    lives <- 3
+    lives <- 5
     Browser.document.getElementById("livesTB").innerText <- sprintf "Lives:%i" lives
     score <- 0
     Browser.document.getElementById("scoreTB").innerText <- sprintf "Score:%i" score
