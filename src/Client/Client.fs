@@ -193,103 +193,169 @@ open Fable.Core.JsInterop
   
 // ghostCatcher ()
 
-let wormChase () =
+// let wormChase () =
+//   let mutable score = 0
+//   let mutable lives = 5
+//   let mutable chickenX = 6
+//   let mutable chickenY = 10
+//   let mutable wormX = 8
+//   let mutable wormY = 0
+//   let mainBody = Browser.document.getElementById("body")
+//   let gameBackground = Browser.document.createElement_div()
+//   gameBackground.style.background <- "linear-gradient(blue, green)"
+//   gameBackground.style.height <- "600px"
+//   let gameGround = Browser.document.createElement_div()
+//   gameGround.style.background <- "linear-gradient(green, saddlebrown)"
+//   gameGround.style.height <- "100px"
+//   let chicken = Browser.document.createElement_img()
+//   chicken.id <- "chicken"
+//   chicken.style.position <- "absolute"
+//   chicken.style.top <- "500px"
+//   chicken.style.left <- "300px"
+//   chicken.src <- "images/chickenface.png"
+//   chicken.width <- 50.
+//   let worm = Browser.document.createElement_img()
+//   worm.id <- "worm"
+//   worm.style.position <- "absolute"
+//   worm.src <- "images/worm.png"
+//   worm.width <- 30.
+//   let scoreUi = Browser.document.createElement_h1()
+//   scoreUi.innerText <- "Score:0"
+//   scoreUi.id <- "scoreTB"
+//   scoreUi.style.fontSize <- "20pt"
+//   let livesUi = Browser.document.createElement_h1()
+//   livesUi.id <- "livesTB"
+//   livesUi.style.fontSize <- "20pt"
+//   livesUi.innerText <- sprintf "Lives:%i" lives
+//   mainBody.appendChild gameBackground |> ignore
+//   mainBody.appendChild worm |> ignore
+//   mainBody.appendChild chicken |> ignore
+//   gameBackground.appendChild scoreUi |> ignore
+//   gameBackground.appendChild livesUi |> ignore
+//   mainBody.appendChild gameGround |> ignore
+
+//   let setLeft (id, x) = Browser.document.getElementById(id).style.left <- x.ToString() + "px"
+//   let setTop(id, y) = Browser.document.getElementById(id).style.top <- (sprintf "%ipx" y)
+
+//   let handleKeys(e:Browser.KeyboardEvent) =
+//     if (e.keyCode = 37.) then
+//       chickenX <- chickenX - 1
+//     if (e.keyCode = 39.) then
+//       chickenX <- chickenX + 1
+
+//     setLeft("chicken", chickenX * 50)
+//     setTop("chicken", chickenY * 50)
+
+//   Browser.document.onkeydown <- handleKeys;
+
+//   let randomNumber(low, high) =
+//     let rnd = System.Random()
+//     rnd.Next(low,high)
+
+//   let gameOver() =
+//     Browser.window.alert("Game Over! You scored:" + (score.ToString()))
+//     lives <- 5
+//     Browser.document.getElementById("livesTB").innerText <- sprintf "Lives:%i" lives
+//     score <- 0
+//     Browser.document.getElementById("scoreTB").innerText <- sprintf "Score:%i" score
+//     //location.reload();
+
+//   let missedworm() =
+//     wormY <- 0
+//     wormX <- randomNumber(2, 16)
+//     lives <- lives - 1
+//     Browser.document.getElementById("livesTB").innerText <- sprintf "Lives:%i" lives
+//     if (lives = 0) then
+//       gameOver()
+//     else
+//       ()
+
+//   let caughtworm() =
+//     wormY <- 0
+//     wormX <- randomNumber(2, 16)
+//     score <- score + 1
+//     Browser.document.getElementById("scoreTB").innerText <- sprintf "Score:%i" score
+
+//   let moveworm() =
+//     wormY <- wormY + 1;
+//     setLeft("worm", wormX * 50)
+//     setTop("worm", wormY * 50)
+//     if (wormY > chickenY + 1) then
+//       missedworm()
+//     else
+//       if (chickenX = wormX && chickenY = wormY) then
+//         caughtworm()
+//       else
+//         ()
+  
+//   let gameTimer = Browser.window.setInterval(moveworm, 200);
+
+//   ()
+  
+// wormChase ()
+
+let chickenCatch () =
   let mutable score = 0
-  let mutable lives = 5
-  let mutable chickenX = 6
-  let mutable chickenY = 10
-  let mutable wormX = 8
-  let mutable wormY = 0
-  let mainBody = Browser.document.getElementById("body")
-  let gameBackground = Browser.document.createElement_div()
-  gameBackground.style.background <- "linear-gradient(blue, green)"
-  gameBackground.style.height <- "600px"
-  let gameGround = Browser.document.createElement_div()
-  gameGround.style.background <- "linear-gradient(green, saddlebrown)"
-  gameGround.style.height <- "100px"
-  let chicken = Browser.document.createElement_img()
-  chicken.id <- "chicken"
-  chicken.style.position <- "absolute"
-  chicken.style.top <- "500px"
-  chicken.style.left <- "300px"
-  chicken.src <- "images/chickenface.png"
-  chicken.width <- 50.
-  let worm = Browser.document.createElement_img()
-  worm.id <- "worm"
-  worm.style.position <- "absolute"
-  worm.src <- "images/worm.png"
-  worm.width <- 30.
+  let mutable speed = 1.
+  let mutable isGameOver = false
+
+  let setLeft (id, x:float) = Browser.document.getElementById(id).style.left <- (sprintf "%ipx" (int x))
+  let setTop(id, y:float) = Browser.document.getElementById(id).style.top <- (sprintf "%ipx" (int y))
+
+  let randomNumber(low, high) =
+    let rnd = System.Random()
+    rnd.Next(int low,int high) |> System.Convert.ToDouble
+
   let scoreUi = Browser.document.createElement_h1()
   scoreUi.innerText <- "Score:0"
   scoreUi.id <- "scoreTB"
   scoreUi.style.fontSize <- "20pt"
-  let livesUi = Browser.document.createElement_h1()
-  livesUi.id <- "livesTB"
-  livesUi.style.fontSize <- "20pt"
-  livesUi.innerText <- sprintf "Lives:%i" lives
+
+  let popped _ =
+    score <- score + 1
+    speed <- speed + 1.
+    Browser.document.getElementById("scoreTB").innerText <- "Score:" + score.ToString()
+    setTop("chicken", Browser.window.innerHeight)
+    let randomNum = randomNumber(0, Browser.window.innerWidth - 100.);
+    setLeft("chicken", randomNum)
+
+  let mainBody = Browser.document.getElementById("body")
+  let gameBackground = Browser.document.createElement_div()
+  gameBackground.style.background <- "linear-gradient(blue, green)"
+  gameBackground.style.height <- sprintf "%ipx" (int Browser.window.innerHeight)
+  let chicken = Browser.document.createElement_img()
+  chicken.id <- "chicken"
+  chicken.style.position <- "absolute"
+  chicken.style.top <- "400px"
+  chicken.style.left <- "400px"
+  chicken.src <- "images/chickenface.png"
+  chicken.width <- 50.
+  chicken.onclick <- popped
   mainBody.appendChild gameBackground |> ignore
-  mainBody.appendChild worm |> ignore
   mainBody.appendChild chicken |> ignore
   gameBackground.appendChild scoreUi |> ignore
-  gameBackground.appendChild livesUi |> ignore
-  mainBody.appendChild gameGround |> ignore
 
-  let setLeft (id, x) = Browser.document.getElementById(id).style.left <- x.ToString() + "px"
-  let setTop(id, y) = Browser.document.getElementById(id).style.top <- (sprintf "%ipx" y)
+  let checkForGameOver() =
+    if isGameOver then
+      isGameOver <-false
+      Browser.window.alert("Game Over! You scored:" + (score.ToString()))
+      score <- 0
+      speed <- 1.
+      Browser.document.getElementById("scoreTB").innerText <- sprintf "Score:%i" score
+      setTop("chicken", Browser.window.innerHeight)
 
-  let handleKeys(e:Browser.KeyboardEvent) =
-    if (e.keyCode = 37.) then
-      chickenX <- chickenX - 1
-    if (e.keyCode = 39.) then
-      chickenX <- chickenX + 1
-
-    setLeft("chicken", chickenX * 50)
-    setTop("chicken", chickenY * 50)
-
-  Browser.document.onkeydown <- handleKeys;
-
-  let randomNumber(low, high) =
-    let rnd = System.Random()
-    rnd.Next(low,high)
-
-  let gameOver() =
-    Browser.window.alert("Game Over! You scored:" + (score.ToString()))
-    lives <- 5
-    Browser.document.getElementById("livesTB").innerText <- sprintf "Lives:%i" lives
-    score <- 0
-    Browser.document.getElementById("scoreTB").innerText <- sprintf "Score:%i" score
-    //location.reload();
-
-  let missedworm() =
-    wormY <- 0
-    wormX <- randomNumber(2, 16)
-    lives <- lives - 1
-    Browser.document.getElementById("livesTB").innerText <- sprintf "Lives:%i" lives
-    if (lives = 0) then
-      gameOver()
+  let floatUp() =
+    let getTop(id) = Browser.document.getElementById(id).offsetTop
+    let y = getTop("chicken")
+    if (y < -100. && not isGameOver) then
+      isGameOver <- true
     else
-      ()
+      setTop("chicken", y - speed);
 
-  let caughtworm() =
-    wormY <- 0
-    wormX <- randomNumber(2, 16)
-    score <- score + 1
-    Browser.document.getElementById("scoreTB").innerText <- sprintf "Score:%i" score
-
-  let moveworm() =
-    wormY <- wormY + 1;
-    setLeft("worm", wormX * 50)
-    setTop("worm", wormY * 50)
-    if (wormY > chickenY + 1) then
-      missedworm()
-    else
-      if (chickenX = wormX && chickenY = wormY) then
-        caughtworm()
-      else
-        ()
+  let gameTimer = Fable.Import.JS.setInterval floatUp 25
+  Fable.Import.JS.setInterval checkForGameOver 25 |> ignore
   
-  let gameTimer = Browser.window.setInterval(moveworm, 200);
 
   ()
   
-wormChase ()
+chickenCatch ()
